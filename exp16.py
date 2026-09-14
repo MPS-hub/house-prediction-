@@ -1,45 +1,44 @@
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
-from sklearn.preprocessing import MinMaxScaler as mm, LabelEncoder
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
 
-import os
+df = pd.read_csv("House Price Prediction Dataset.csv")
 
-path = "House Price Prediction Dataset - House Price Prediction Dataset.csv"
-if not os.path.exists(path):
-    path = "House Price Prediction Dataset.csv"
+print("--- First 5 rows ---")
+print(df.head())
 
-df = pd.read_csv(path)
+print("\n--- Dataset Shape ---")
+print(df.shape)
 
-df.drop_duplicates(inplace=True)
+print("\n--- Missing Values ---")
+print(df.isna().sum())
 
-df.drop(["Id"], axis=1, inplace=True, errors="ignore")
+print("\n--- Dataset Info ---")
+df.info()
 
-le_location = LabelEncoder()
-le_condition = LabelEncoder()
-le_garage = LabelEncoder()
+X = df[['Area', 'Bedrooms', 'Bathrooms', 'Floors', 'YearBuilt']]
+y = df['Price']
 
-df["Location"] = le_location.fit_transform(df["Location"])
-df["Condition"] = le_condition.fit_transform(df["Condition"])
-df["Garage"] = le_garage.fit_transform(df["Garage"])
-
-x = df.drop(["Price"], axis=1)
-y = df["Price"]
-
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
-
-sc = mm()
-x_train_scaled = sc.fit_transform(x_train)
-x_test_scaled = sc.transform(x_test)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 model = LinearRegression()
-model.fit(x_train_scaled, y_train)
+model.fit(X_train, y_train)
 
-y_pred = model.predict(x_test_scaled)
-score = r2_score(y_test, y_pred)
+y_pred = model.predict(X_test)
+
 mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
 
-print("R2 Score:", score)
-print("Mean Squared Error (MSE):", mse)
+print("\n--- Model Evaluation ---")
+print("MSE:", mse)
+print("R2 Score:", r2)
+
+print("\n--- Correlations with Price ---")
+print("Id vs Price:", df['Id'].corr(df['Price']))
+print("Area vs Price:", df['Area'].corr(df['Price']))
+
+print("\n--- Correlation Matrix ---")
 print(df.corr(numeric_only=True))
