@@ -4,19 +4,25 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.preprocessing import MinMaxScaler as mm, LabelEncoder
 
+import os
+
 path = "House Price Prediction Dataset - House Price Prediction Dataset.csv"
+if not os.path.exists(path):
+    path = "House Price Prediction Dataset.csv"
+
 df = pd.read_csv(path)
 
 df.drop_duplicates(inplace=True)
 
-le = LabelEncoder()
-df["Location"] = le.fit_transform(df["Location"])
-df["Condition"] = le.fit_transform(df["Condition"])
-df["Garage"] = le.fit_transform(df["Garage"])
+df.drop(["Id"], axis=1, inplace=True, errors="ignore")
 
-df.drop(["Id"], axis=1, inplace=True)
+le_location = LabelEncoder()
+le_condition = LabelEncoder()
+le_garage = LabelEncoder()
 
-df.to_csv(path, index=False)
+df["Location"] = le_location.fit_transform(df["Location"])
+df["Condition"] = le_condition.fit_transform(df["Condition"])
+df["Garage"] = le_garage.fit_transform(df["Garage"])
 
 x = df.drop(["Price"], axis=1)
 y = df["Price"]
